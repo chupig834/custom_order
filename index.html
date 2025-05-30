@@ -97,13 +97,33 @@
         <span id="serviceFee">$0.00</span>
       </div>
       <div class="result-row total">
-        <span>預估總金額：</span>
+        <span>預估總金額($美金）：</span>
         <span id="total">$0.00</span>
+      </div>
+      <div class="rate-info" id="rateInfo">載入匯率中...</div>
+      <div class="result-row total_TWD">
+        <span>預估總金額($台幣）：</span>
+        <span id="total_TWD">$0.00</span>
       </div>
     </div>
   </div>
 
   <script>
+    let exchangeRate = 0;
+
+    async function loadExchangeRate() {
+      try {
+        const res = await fetch('rate.json');
+        const data = await res.json();
+        exchangeRate = data.usd_to_twd;
+
+        document.getElementById("rateInfo").textContent = `今日匯率：1 USD ≈ ${exchangeRate} TWD`;
+        updatePrice();
+      } catch (err) {
+        document.getElementById("rateInfo").textContent = "❌ 無法載入匯率資料。";
+        console.error("Failed to load rate.json:", err);
+      }
+    }
     function updatePrice() {
       const price = parseFloat(document.getElementById("price").value) || 0;
       const weight = parseFloat(document.getElementById("weight").value) || 0;
@@ -112,12 +132,14 @@
       const shipping = weight * 7;
       const serviceFee = price * 0.10;
       const total = price + tax + shipping + serviceFee;
+      const total_TWD = total * exchange_rate
 
       document.getElementById("itemPrice").textContent = `$${price.toFixed(2)}`;
       document.getElementById("tax").textContent = `$${tax.toFixed(2)}`;
       document.getElementById("shipping").textContent = `$${shipping.toFixed(2)}`;
       document.getElementById("serviceFee").textContent = `$${serviceFee.toFixed(2)}`;
       document.getElementById("total").textContent = `$${total.toFixed(2)}`;
+      document.getElementById("total_TWD").textContent = `$${total_TWD.toFixed(2)}`;
     }
 
     // Initialize display

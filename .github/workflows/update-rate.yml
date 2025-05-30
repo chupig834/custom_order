@@ -1,0 +1,35 @@
+name: Update Exchange Rate JSON
+
+on:
+  schedule:
+    - cron: "0 2 * * *"  # Runs daily at 2 AM UTC
+  workflow_dispatch:     # Allows manual trigger
+
+jobs:
+  update-rate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install dotenv
+
+      - name: Run generate-rate.js
+        run: |
+          echo "EXCHANGE_RATE_API_KEY=${{ secrets.EXCHANGE_RATE_API_KEY }}" > .env
+          node generate-rate.js
+
+      - name: Commit and push if rate.json changed
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add rate.json
+          git diff --cached --quiet || git commit -m "🔁 Daily update: rate.json"
+          git push
