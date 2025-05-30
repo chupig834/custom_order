@@ -18,7 +18,7 @@ https.get(url, (res) => {
 
       const result = {
         date: today,
-        usd_to_twd: rate
+        usd_to_twd: Math.round(rate,1) + 1
       };
 
       fs.writeFileSync("rate.json", JSON.stringify(result, null, 2));
