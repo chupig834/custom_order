@@ -62,8 +62,15 @@
       font-weight: bold;
       font-size: 20px;
       color: #007bff;
-      border-top: 1px solid #ccc;
       padding-top: 10px;
+    }
+
+    .notes {
+      margin-top: 20px;
+      font-size: 12px;     /* smaller font */
+      color: #777;         /* lighter color for footnote feel */
+      text-align: center;  /* optional, center-align */
+      font-style: italic;  /* optional, italicize to indicate it's a note */
     }
   </style>
 </head>
@@ -75,35 +82,17 @@
     <input type="number" id="price" step="0.01" placeholder="例如：100" 
       oninput="updatePrice()">
 
-    <label for="weight">商品重量 (磅):</label>
+    <label for="weight">商品材積 (磅):</label>
     <input type="number" id="weight" step="0.1" placeholder="例如：2.5" 
       oninput="updatePrice()">
 
     <div class="results">
-      <div class="result-row">
-        <span>商品價格：</span>
-        <span id="itemPrice">$0.00</span>
-      </div>
-      <div class="result-row">
-        <span>CA 銷售稅 (10%)：</span>
-        <span id="tax">$0.00</span>
-      </div>
-      <div class="result-row">
-        <span>運費 ($7 / 磅)：</span>
-        <span id="shipping">$0.00</span>
-      </div>
-      <div class="result-row">
-        <span>代購服務費 (10%)：</span>
-        <span id="serviceFee">$0.00</span>
-      </div>
-      <div class="result-row">
-        <span>預估總金額($美金）：</span>
-        <span id="total">$0.00</span>
-      </div>
-      <div class="rate-info" id="rateInfo">載入匯率中...</div>
       <div class="result-row total TWD">
         <span>預估總金額($台幣）：</span>
         <span id="total_TWD">$0.00</span>
+      </div>
+      <div class="notes">
+        <span>**此金額為預估收費 實際金額請聯繫我們**</span>
       </div>
     </div>
   </div>
@@ -120,34 +109,48 @@
 
         console.log("Show Rate", exchangeRate);
 
-        document.getElementById("rateInfo").textContent = `今日匯率：1 USD ≈ ${exchangeRate} TWD`;
+        //document.getElementById("rateInfo").textContent = `今日匯率：1 USD ≈ ${exchangeRate} TWD`;
         updatePrice();
       } catch (err) {
-        document.getElementById("rateInfo").textContent = "❌ 無法載入匯率資料。";
+        //document.getElementById("rateInfo").textContent = "❌ 無法載入匯率資料。";
         console.error("Failed to load rate.json:", err);
       }
     }
     function updatePrice() {
       const price = parseFloat(document.getElementById("price").value) || 0;
       const weight = parseFloat(document.getElementById("weight").value) || 0;
+      let serviceFee = 0
+
+      if (price <= 100) {
+        serviceFee = 10
+      }
+      else if (price <= 300) {
+        serviceFee = price * 0.1
+      }
+      else {
+        serviceFee = price * 0.07
+      }
 
       const tax = price * 0.10;
       const shipping = weight * 7;
-      const serviceFee = price * 0.10;
-      const total = price + tax + shipping + serviceFee;
+      //const serviceFee = price * 0.10;
+      let total = price + tax + shipping + serviceFee;
+      if (price == 0) {
+        total = 0
+      }
       const total_TWD = total * exchangeRate
 
-      document.getElementById("itemPrice").textContent = `$${price.toFixed(2)}`;
-      document.getElementById("tax").textContent = `$${tax.toFixed(2)}`;
-      document.getElementById("shipping").textContent = `$${shipping.toFixed(2)}`;
-      document.getElementById("serviceFee").textContent = `$${serviceFee.toFixed(2)}`;
-      document.getElementById("total").textContent = `$${total.toFixed(2)}`;
-      document.getElementById("total_TWD").textContent = `$${total_TWD.toFixed(2)}`;
+      // document.getElementById("itemPrice").textContent = `$${price.toFixed(2)}`;
+      // document.getElementById("tax").textContent = `$${tax.toFixed(2)}`;
+      // document.getElementById("shipping").textContent = `$${shipping.toFixed(2)}`;
+      // document.getElementById("serviceFee").textContent = `$${serviceFee.toFixed(2)}`;
+      // document.getElementById("total").textContent = `$${total.toFixed(2)}`;
+      document.getElementById("total_TWD").textContent = `$${total_TWD.toFixed(0)}`;
     }
 
     // Initialize display
     updatePrice();
-    window.onload = loadExchangeRate;
+    window.onload = loadExchangeRate();
   </script>
 </body>
 </html>
