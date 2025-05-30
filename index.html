@@ -96,12 +96,12 @@
         <span>代購服務費 (10%)：</span>
         <span id="serviceFee">$0.00</span>
       </div>
-      <div class="result-row total">
+      <div class="result-row">
         <span>預估總金額($美金）：</span>
         <span id="total">$0.00</span>
       </div>
       <div class="rate-info" id="rateInfo">載入匯率中...</div>
-      <div class="result-row total_TWD">
+      <div class="result-row total TWD">
         <span>預估總金額($台幣）：</span>
         <span id="total_TWD">$0.00</span>
       </div>
@@ -114,8 +114,11 @@
     async function loadExchangeRate() {
       try {
         const res = await fetch('rate.json');
+        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
         const data = await res.json();
         exchangeRate = data.usd_to_twd;
+
+        console.log("Show Rate", exchangeRate);
 
         document.getElementById("rateInfo").textContent = `今日匯率：1 USD ≈ ${exchangeRate} TWD`;
         updatePrice();
@@ -132,7 +135,7 @@
       const shipping = weight * 7;
       const serviceFee = price * 0.10;
       const total = price + tax + shipping + serviceFee;
-      const total_TWD = total * exchange_rate
+      const total_TWD = total * exchangeRate
 
       document.getElementById("itemPrice").textContent = `$${price.toFixed(2)}`;
       document.getElementById("tax").textContent = `$${tax.toFixed(2)}`;
@@ -144,6 +147,7 @@
 
     // Initialize display
     updatePrice();
+    window.onload = loadExchangeRate;
   </script>
 </body>
 </html>
