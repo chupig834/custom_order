@@ -22,9 +22,9 @@ jobs:
         run: npm install dotenv
 
       - name: Run generate-rate.js
-        run: |
-          echo "EXCHANGE_RATE_API_KEY=${{ secrets.EXCHANGE_RATE_API_KEY }}" > .env
-          node generate-rate.js
+        run: node generate-rate.js
+        env:
+          EXCHANGE_RATE_API_KEY: ${{ secrets.EXCHANGE_RATE_API_KEY }}
 
       - name: Commit and push if rate.json changed
         run: |
@@ -34,8 +34,16 @@ jobs:
           git diff --cached --quiet || git commit -m "🔁 Daily update: rate.json"
           git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Debug env injection (for testing only)
+      # Debug step - tests if secret exists without printing it
+      - name: Debug secret availability
         run: |
-          echo "Key injected: ${{ secrets.EXCHANGE_RATE_API_KEY }}"
+          if [ -z "$EXCHANGE_RATE_API_KEY" ]; then
+            echo "❌ EXCHANGE_RATE_API_KEY is empty or not set"
+            exit 1
+          else
+            echo "✅ EXCHANGE_RATE_API_KEY is available (length: ${#EXCHANGE_RATE_API_KEY})"
+          fi
+        env:
+          EXCHANGE_RATE_API_KEY: ${{ secrets.EXCHANGE_RATE_API_KEY }}
