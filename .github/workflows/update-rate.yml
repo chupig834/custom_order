@@ -32,6 +32,6 @@ jobs:
           git config user.email "actions@github.com"
           git add rate.json
           git diff --cached --quiet || git commit -m "🔁 Daily update: rate.json"
-          git push origin HEAD:${{github.ref}}
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
